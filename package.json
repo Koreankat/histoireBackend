@@ -9,6 +9,9 @@
     "seed:db": "node utils/seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines": {
+    "node": "19.6.1"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
