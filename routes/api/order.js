@@ -18,11 +18,13 @@ router.post("/add", auth, async (req, res) => {
     const cart = req.body.cartId
     const total = req.body.total
     const user = req.user._id
+    const products = req.body.products
 
     const order = new Order({
       cart,
       user,
       total,
+      products: JSON.stringify(products),
     })
 
     const orderDoc = await order.save()
@@ -39,7 +41,7 @@ router.post("/add", auth, async (req, res) => {
       created: orderDoc.created,
       user: orderDoc.user,
       total: orderDoc.total,
-      products: cartDoc.products,
+      products: JSON.parse(orderDoc.products),
     }
 
     await mailgun.sendEmail(order.user.email, "order-confirmation", newOrder)
@@ -47,7 +49,11 @@ router.post("/add", auth, async (req, res) => {
     res.status(200).json({
       success: true,
       message: `Your order has been placed successfully!`,
-      order: { _id: orderDoc._id },
+      order: {
+        _id: orderDoc._id,
+        total: orderDoc.total,
+        products: JSON.parse(orderDoc.products),
+      },
     })
   } catch (error) {
     res.status(400).json({
@@ -105,11 +111,11 @@ router.get("/search", auth, async (req, res) => {
           _id: o._id,
           total: parseFloat(Number(o.total.toFixed(2))),
           created: o.created,
-          products: o.cart?.products,
+          products: JSON.parse(o.products),
         }
       })
 
-      let orders = newOrders.map((o) => store.caculateTaxAmount(o))
+      let orders = newOrders
       orders.sort((a, b) => b.created - a.created)
       res.status(200).json({
         orders,
@@ -242,6 +248,7 @@ router.get("/:orderId", auth, async (req, res) => {
       total: orderDoc.total,
       created: orderDoc.created,
       totalTax: 0,
+      cartProducts: JSON.parse(orderDoc.products),
       products: orderDoc?.cart?.products,
       cartId: orderDoc.cart._id,
       user_firstname: user.firstName,
@@ -255,7 +262,7 @@ router.get("/:orderId", auth, async (req, res) => {
       zipCode: address?.zipCode,
     }
 
-    order = store.caculateTaxAmount(order)
+    // order = store.caculateTaxAmount(order)
 
     res.status(200).json({
       order,
