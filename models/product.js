@@ -38,7 +38,18 @@ const ProductSchema = new Schema({
     type: Number,
   },
   price: {
-    type: Number,
+    type: Object,
+    default: {
+      "6": 100,
+      "8": 200,
+      "10": 300,
+      "12": 400,
+      "15": 500,
+      "20": 600,
+      "25": 700,
+      "50": 800,
+      "100": 900,
+    },
   },
   taxable: {
     type: Boolean,
@@ -55,6 +66,7 @@ const ProductSchema = new Schema({
       6: "20",
       7: "25",
       8: "50",
+      9: "100",
     },
   },
   isActive: {
